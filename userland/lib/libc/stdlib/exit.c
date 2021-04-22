@@ -41,7 +41,6 @@ exit(int code)
 	 * In a more complicated libc, this would call functions registered
 	 * with atexit() before calling the syscall to actually exit.
 	 */
-
 #ifdef __mips__
 	/*
 	 * Because gcc knows that _exit doesn't return, if we call it
@@ -80,4 +79,5 @@ exit(int code)
 	 * is to loop.
 	 */
 	while (1) { }
+
 }
