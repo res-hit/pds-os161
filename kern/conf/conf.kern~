@@ -465,6 +465,7 @@ defoption hello
 
 optfile	hello main/hello.c
 
-defoption write
+defoption lab2
 
-optfile write syscall/file_syscalls.c
+optfile lab2 syscall/file_syscalls.c
+optfile lab2 syscall/proc_syscalls.c

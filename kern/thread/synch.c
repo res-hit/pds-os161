@@ -40,6 +40,7 @@
 #include <current.h>
 #include <synch.h>
 
+
 ////////////////////////////////////////////////////////////
 //
 // Semaphore.
@@ -124,7 +125,7 @@ void
 V(struct semaphore *sem)
 {
         KASSERT(sem != NULL);
-
+	
 	spinlock_acquire(&sem->sem_lock);
 
         sem->sem_count++;
@@ -142,6 +143,7 @@ struct lock *
 lock_create(const char *name)
 {
         struct lock *lock;
+	char sem_name[] = "sem_";
 
         lock = kmalloc(sizeof(*lock));
         if (lock == NULL) {
@@ -153,7 +155,10 @@ lock_create(const char *name)
                 kfree(lock);
                 return NULL;
         }
-
+	#if OPT_LAB3
+	kstrcat(sem_name,name);
+	lock->sem = sem_create(sem_name,1);
+	#endif
         // add stuff here as needed
 
         return lock;
@@ -163,36 +168,66 @@ void
 lock_destroy(struct lock *lock)
 {
         KASSERT(lock != NULL);
-
+	
+	#if OPT_LAB3
+	sem_destroy(lock->sem);
+	lock->sem = NULL;
+	kfree(lock->lk_name);
+        kfree(lock);
+	#else
         // add stuff here as needed
 
         kfree(lock->lk_name);
         kfree(lock);
+	#endif
 }
 
 void
 lock_acquire(struct lock *lock)
 {
+	#if OPT_LAB3
+	P(lock->sem);
+	spinlock_acquire(lock->owner_spinlock);
+	lock->owner = curthread;
+	spinlock_release(lock->owner_spinlock);
+	#else
         // Write this
-
+	
         (void)lock;  // suppress warning until code gets written
+	#endif
+	
 }
 
 void
 lock_release(struct lock *lock)
 {
+	#if OPT_LAB3
+	V(lock->sem);
+	spinlock_acquire(lock->owner_spinlock);
+	KASSERT(curthread != lock->owner);		
+	lock->owner = NULL;
+	spinlock_release(lock->owner_spinlock);
+	#else
         // Write this
-
+	
         (void)lock;  // suppress warning until code gets written
+	#endif
 }
 
 bool
 lock_do_i_hold(struct lock *lock)
 {
+	#if OPT_LAB3
+	spinlock_acquire(lock->owner_spinlock);
+	if ( lock->owner == curthread )
+		return true;
+	else 
+		return false;
+	#else
         // Write this
 
         (void)lock;  // suppress warning until code gets written
-
+	#endif
         return true; // dummy until code gets written
 }
 

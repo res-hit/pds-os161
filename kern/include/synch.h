@@ -74,6 +74,11 @@ void V(struct semaphore *);
  */
 struct lock {
         char *lk_name;
+	#if OPT_LAB3
+	struct thread* owner;
+	struct semaphore* sem;
+	struct spinlock owner_spinlock;
+	#endif 
         // add what you need here
         // (don't forget to mark things volatile as needed)
 };
