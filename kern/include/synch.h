@@ -36,7 +36,7 @@
 
 
 #include <spinlock.h>
-
+#include "opt-lab3.h"
 /*
  * Dijkstra-style semaphore.
  *
@@ -72,12 +72,13 @@ void V(struct semaphore *);
  * The name field is for easier debugging. A copy of the name is
  * (should be) made internally.
  */
+
 struct lock {
         char *lk_name;
 	#if OPT_LAB3
-	struct thread* owner;
+	volatile struct thread* owner;
 	struct semaphore* sem;
-	struct spinlock owner_spinlock;
+	struct spinlock lk_lock;
 	#endif 
         // add what you need here
         // (don't forget to mark things volatile as needed)

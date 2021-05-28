@@ -40,7 +40,6 @@
 #include <current.h>
 #include <synch.h>
 
-
 ////////////////////////////////////////////////////////////
 //
 // Semaphore.
@@ -125,7 +124,7 @@ void
 V(struct semaphore *sem)
 {
         KASSERT(sem != NULL);
-	
+
 	spinlock_acquire(&sem->sem_lock);
 
         sem->sem_count++;
@@ -139,6 +138,7 @@ V(struct semaphore *sem)
 //
 // Lock.
 
+//r: this implementation leads to deadlock, idk why
 struct lock *
 lock_create(const char *name)
 {
@@ -148,7 +148,6 @@ lock_create(const char *name)
         if (lock == NULL) {
                 return NULL;
         }
-
         lock->lk_name = kstrdup(name);
         if (lock->lk_name == NULL) {
                 kfree(lock);
@@ -156,8 +155,13 @@ lock_create(const char *name)
         }
 	#if OPT_LAB3
 	lock->sem = sem_create(lock->lk_name,1);
+	if (lock->sem == NULL){
+	kfree(lock->lk_name);
+	kfree(lock);
+                return NULL;	
+	}
 	lock->owner = NULL;
-	spinlock_init(&lock->owner_spinlock);
+	spinlock_init(&lock->lk_lock);
 	#endif
         // add stuff here as needed
 
@@ -170,32 +174,32 @@ lock_destroy(struct lock *lock)
         KASSERT(lock != NULL);
 	
 	#if OPT_LAB3
+	spinlock_cleanup(&lock->lk_lock);
 	sem_destroy(lock->sem);
-	lock->sem = NULL;
+	#endif
 	kfree(lock->lk_name);
         kfree(lock);
-	spinlock_cleanup(&lock->owner_spinlock);
-	#else
-        // add stuff here as needed
-
-        kfree(lock->lk_name);
-        kfree(lock);
-	#endif
 }
 
 void
 lock_acquire(struct lock *lock)
-{
-	#if OPT_LAB3
-	P(lock->sem);
-	spinlock_acquire(&lock->owner_spinlock);
-	lock->owner = curthread;
-	spinlock_release(&lock->owner_spinlock);
-	#else
-        // Write this
+{	
 	
-        (void)lock;  // suppress warning until code gets written
+	#if OPT_LAB3
+	KASSERT(lock != NULL);
+	if (lock_do_i_hold(lock)){
+		kprintf("I'm already owning this lock!");
+	}
+	KASSERT(!(lock_do_i_hold(lock)));
+	KASSERT(curthread-> t_in_interrupt = false);	
+
+	P(lock->sem);
+	spinlock_acquire(&lock->lk_lock);
+	KASSERT(lock->owner == NULL);
+	lock->owner = curthread;
+	spinlock_release(&lock->lk_lock);
 	#endif
+	(void) lock;
 	
 }
 
@@ -203,35 +207,31 @@ void
 lock_release(struct lock *lock)
 {
 	#if OPT_LAB3
-	spinlock_acquire(&lock->owner_spinlock);
-	KASSERT(curthread != lock->owner);		
+	KASSERT(lock != NULL);
+	KASSERT(lock_do_i_hold(lock));	
+	spinlock_acquire(&lock->lk_lock);	
 	lock->owner = NULL;
-	
 	V(lock->sem);
-	spinlock_release(&lock->owner_spinlock);
-	#else
-        // Write this
-	
-        (void)lock;  // suppress warning until code gets written
+	spinlock_release(&lock->lk_lock);
 	#endif
+	(void) lock;
 }
 
 bool
 lock_do_i_hold(struct lock *lock)
 {
+	bool res;
 	#if OPT_LAB3
-	spinlock_acquire(&lock->owner_spinlock);
-	if ( lock->owner == curthread )
-		return true;
-	else 
-		return false;
-	spinlock_release(&lock->owner_spinlock);
-	#else
-        // Write this
-
-        (void)lock;  // suppress warning until code gets written
+	spinlock_acquire(&lock->lk_lock);
+	
+	res = lock->owner == curthread;
+	
+	spinlock_release(&lock->lk_lock);
+	return res;
 	#endif
-        return true; // dummy until code gets written
+	
+	(void) lock;
+	return true;
 }
 
 ////////////////////////////////////////////////////////////
@@ -294,3 +294,4 @@ cv_broadcast(struct cv *cv, struct lock *lock)
 	(void)cv;    // suppress warning until code gets written
 	(void)lock;  // suppress warning until code gets written
 }
+

@@ -30,6 +30,9 @@ options sfs			# Always use the file system
 #options netfs			# You might write this as a project.
 
 options dumbvm			# Chewing gum and baling wire.
+
 ######################## user defined options ###############################
+
+#options hello
 
 options lab3
