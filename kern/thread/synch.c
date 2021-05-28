@@ -143,7 +143,6 @@ struct lock *
 lock_create(const char *name)
 {
         struct lock *lock;
-	char sem_name[] = "sem_";
 
         lock = kmalloc(sizeof(*lock));
         if (lock == NULL) {
@@ -156,8 +155,9 @@ lock_create(const char *name)
                 return NULL;
         }
 	#if OPT_LAB3
-	kstrcat(sem_name,name);
-	lock->sem = sem_create(sem_name,1);
+	lock->sem = sem_create(lock->lk_name,1);
+	lock->owner = NULL;
+	spinlock_init(&lock->owner_spinlock);
 	#endif
         // add stuff here as needed
 
@@ -174,6 +174,7 @@ lock_destroy(struct lock *lock)
 	lock->sem = NULL;
 	kfree(lock->lk_name);
         kfree(lock);
+	spinlock_cleanup(&lock->owner_spinlock);
 	#else
         // add stuff here as needed
 
@@ -187,9 +188,9 @@ lock_acquire(struct lock *lock)
 {
 	#if OPT_LAB3
 	P(lock->sem);
-	spinlock_acquire(lock->owner_spinlock);
+	spinlock_acquire(&lock->owner_spinlock);
 	lock->owner = curthread;
-	spinlock_release(lock->owner_spinlock);
+	spinlock_release(&lock->owner_spinlock);
 	#else
         // Write this
 	
@@ -202,11 +203,12 @@ void
 lock_release(struct lock *lock)
 {
 	#if OPT_LAB3
-	V(lock->sem);
-	spinlock_acquire(lock->owner_spinlock);
+	spinlock_acquire(&lock->owner_spinlock);
 	KASSERT(curthread != lock->owner);		
 	lock->owner = NULL;
-	spinlock_release(lock->owner_spinlock);
+	
+	V(lock->sem);
+	spinlock_release(&lock->owner_spinlock);
 	#else
         // Write this
 	
@@ -218,11 +220,12 @@ bool
 lock_do_i_hold(struct lock *lock)
 {
 	#if OPT_LAB3
-	spinlock_acquire(lock->owner_spinlock);
+	spinlock_acquire(&lock->owner_spinlock);
 	if ( lock->owner == curthread )
 		return true;
 	else 
 		return false;
+	spinlock_release(&lock->owner_spinlock);
 	#else
         // Write this
 
