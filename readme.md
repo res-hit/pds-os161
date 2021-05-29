@@ -1,1 +1,3 @@
-# Lab2
+# Lab3
+
+- implementation of locks with semaphores
