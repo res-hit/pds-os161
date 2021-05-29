@@ -1,4 +1,4 @@
-# Repository for os161 labs
+# Repository for os161 labs of the System Programming(OS internals) course 
 
  # Lab2 - System Calls and Memory allocation module
  - system calls: read, write, exit
