@@ -6,3 +6,5 @@
  # Lab3 - Implementation of Synchronization primitives (kernel side)
  - not busy waiting locks
  - not busy waiting condition variables
+ 
+ # Lab4 - Implementation of *waitpid* system call
