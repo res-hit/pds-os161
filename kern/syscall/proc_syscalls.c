@@ -18,7 +18,9 @@
 #if OPT_LAB2
 #include <current.h>
 #endif
-
+#if OPT_LAB4
+#include <synch.h>
+#endif
 /*
  * simple proc management system calls
  */
@@ -34,7 +36,11 @@ sys__exit(int status)
   #if OPT_LAB2
   struct thread *t = curthread;
   t->t_retcode = status;
+  t->t_proc->p_status = status;
   //still to be handled
+  #endif
+  #if OPT_LAB4
+  V(t->t_proc->p_sem);
   #endif
   /* thread exits. proc data structure will be lost */
   thread_exit();

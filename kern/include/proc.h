@@ -37,6 +37,10 @@
  */
 
 #include <spinlock.h>
+#include "opt-lab4.h"
+#if OPT_LAB4
+#include <synch.h>
+#endif
 
 struct addrspace;
 struct thread;
@@ -69,7 +73,11 @@ struct proc {
 
 	/* VFS */
 	struct vnode *p_cwd;		/* current working directory */
-
+	
+	#if OPT_LAB4
+	int p_status;
+	struct semaphore *p_sem;
+	#endif
 	/* add more material here as needed */
 };
 
@@ -97,5 +105,8 @@ struct addrspace *proc_getas(void);
 /* Change the address space of the current process, and return the old one. */
 struct addrspace *proc_setas(struct addrspace *);
 
+#if OPT_LAB4
+int proc_wait(struct proc *proc);
+#endif
 
 #endif /* _PROC_H_ */

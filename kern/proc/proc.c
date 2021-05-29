@@ -318,3 +318,13 @@ proc_setas(struct addrspace *newas)
 	spinlock_release(&proc->p_lock);
 	return oldas;
 }
+
+#if OPT_LAB4
+int proc_wait(struct proc *proc){
+		
+	proc->p_sem = sem_create("waitprocess", 0);
+	P(proc->p_sem);
+	sem_destroy(proc->p_sem);
+	return proc->p_status;
+}
+#endif

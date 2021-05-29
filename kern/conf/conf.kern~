@@ -470,4 +470,4 @@ defoption lab2
 optfile lab2 syscall/file_syscalls.c
 optfile lab2 syscall/proc_syscalls.c
 
-defoption synch
+defoption lab3
