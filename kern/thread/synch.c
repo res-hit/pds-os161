@@ -272,7 +272,7 @@ cv_create(const char *name)
         }
 
         // add stuff here as needed
-#if OPT_SYNCH
+#if OPT_LAB3
 	cv->cv_wchan = wchan_create(cv->cv_name);
 	if (cv->cv_wchan == NULL) {
 	        kfree(cv->cv_name);
@@ -290,8 +290,8 @@ cv_destroy(struct cv *cv)
         KASSERT(cv != NULL);
 
         // add stuff here as needed
-#if OPT_SYNCH
-	wchan_destroy(cv->cv_wchan)
+#if OPT_LAB3
+	wchan_destroy(cv->cv_wchan);
 	spinlock_cleanup(&cv->cv_lock);
 #endif
         kfree(cv->cv_name);
@@ -305,7 +305,7 @@ void
 cv_wait(struct cv *cv, struct lock *lock)
 {
         // Write this
-#if OPT_SYNCH
+#if OPT_LAB3
 	//add a spinlock in order to guarantee mutual exclusion for lock release since the second is a pointer
 	//(or is it just to make wchan work?)--> both!!!
 	/* G.Cabodi - 2019: spinlock already owned as ***atomic lock_release+wchan_sleep
@@ -334,7 +334,7 @@ void
 cv_signal(struct cv *cv, struct lock *lock)
 {
         // Write this
-#if OPT_SYNCH
+#if OPT_LAB3
 	//spinlock can be acquired since wchan is sleeping, but has released inside the wchan the spinlock-> no deadlock can 		//occur
 	
 	/* g.Cabodi - 2019: here the spinlock is NOT required, as no atomic operation 
@@ -355,12 +355,12 @@ void
 cv_broadcast(struct cv *cv, struct lock *lock)
 {
 	// Write this
-	spinlock_acquire(&cv->cv_lock);
+	
+#if OPT_LAB3
+        spinlock_acquire(&cv->cv_lock);
 	//wake up one thread sleeping which had the spinlock we are using in the wchan
 	wchan_wakeall(cv->cv_wchan, &cv->cv_lock);
 	spinlock_release(&cv->cv_lock);
-#if OPT_SYNCH
-        
 #endif
 	(void)cv;    // suppress warning until code gets written
 	(void)lock;  // suppress warning until code gets written
