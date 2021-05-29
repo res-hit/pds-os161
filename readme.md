@@ -1,3 +1,3 @@
 # Lab3
 
-- implementation of locks with semaphores
+- implementation of locks with semaphores(not working)
