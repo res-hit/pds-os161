@@ -321,10 +321,12 @@ proc_setas(struct addrspace *newas)
 
 #if OPT_LAB4
 int proc_wait(struct proc *proc){
-		
+	int result;
 	proc->p_sem = sem_create("waitprocess", 0);
 	P(proc->p_sem);
+	result=proc->p_status;
 	sem_destroy(proc->p_sem);
-	return proc->p_status;
+	proc_destroy(proc); 
+	return result;
 }
 #endif

@@ -28,19 +28,26 @@ void
 sys__exit(int status)
 {
   /* get address space of current process and destroy */
+  /*	from lab4 not needed anymore, since all process structure released 
+	from kernel waiting for process to finish
   struct addrspace *as = proc_getas();
   as_destroy(as);
-  
+	*/
 
   //(void) status; // TODO: status handling 
   #if OPT_LAB2
   struct thread *t = curthread;
-  t->t_retcode = status;
+  #if OPT_LAB4
+	//!!!!!!!!!!!!!!!!!!!!!!////
+ 	 struct proc* p = t->t_proc; //store struct process address since from curthread we won't be able to acces anymore!
+  //t->t_retcode = status;
   t->t_proc->p_status = status;
+  #endif	
   //still to be handled
   #endif
   #if OPT_LAB4
-  V(t->t_proc->p_sem);
+  proc_remthread(t);
+  V(p->p_sem);
   #endif
   /* thread exits. proc data structure will be lost */
   thread_exit();
