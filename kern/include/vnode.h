@@ -31,6 +31,7 @@
 #define _VNODE_H_
 
 #include <spinlock.h>
+#include "opt-lab5.h"
 struct uio;
 struct stat;
 
@@ -57,6 +58,10 @@ struct vnode {
 	void *vn_data;                  /* Filesystem-specific data */
 
 	const struct vnode_ops *vn_ops; /* Functions on this vnode */
+	#if OPT_LAB5
+	off_t offset;
+	struct lock* v_lock;	
+	#endif
 };
 
 /*

@@ -33,6 +33,7 @@
 
 #include <cdefs.h> /* for __DEAD */
 #include "opt-lab2.h"
+#include "opt-lab5.h"
 struct trapframe; /* from <machine/trapframe.h> */
 
 /*
@@ -64,4 +65,10 @@ ssize_t sys_read(int filehandle, char* buf, size_t size);
 ssize_t sys_write(int filehandle, char* buf, size_t size);
 void sys__exit(int status);
 #endif
+
+#if OPT_LAB5
+int sys_open(const userptr_t filename, int flags, mode_t mode);
+int sys_close(int fd);
+#endif
+
 #endif /* _SYSCALL_H_ */

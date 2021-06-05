@@ -471,3 +471,4 @@ optfile lab2 syscall/file_syscalls.c
 optfile lab2 syscall/proc_syscalls.c
 
 defoption lab3
+defoption lab4

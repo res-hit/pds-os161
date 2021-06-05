@@ -29,7 +29,7 @@
 
 #include <types.h>
 #include <kern/errno.h>
-#include <kern/syscall.h> //RES: NOTA BENE!!
+#include <kern/syscall.h> //RES: NOTA BENE!!Si trova all'interno di os161/build/include/kern non dentro os161/kern
 #include <lib.h>
 #include <mips/trapframe.h>
 #include <thread.h>
@@ -111,23 +111,43 @@ syscall(struct trapframe *tf)
 
 	    /* Add stuff here */
 	    #if OPT_LAB2
-	   /* case SYS_write:
-		err = sys_write((int)tf->tf_a0,
-				(char*)tf->tf_a1,
-				(size_t)tf->tf_a2);*/
-	    case SYS_read:
-		err= sys_read((int)tf->tf_a0,
+	    case SYS_write:
+		retval = sys_write((int)tf->tf_a0,
 				(char*)tf->tf_a1,
 				(size_t)tf->tf_a2);
+		if (retval < 0 ) err = 1;
+		else err=0;//err = 0 means system call implemented!!! So it is a really important addition
+				//do not return directly err as happens for sys__time, in this case we are not propagating error value
+				//err belongs to errno library and has a special meaning for system calls implementation!)
+	    break;
+	    case SYS_read:
+		retval = sys_read((int)tf->tf_a0,
+				(char*)tf->tf_a1,
+				(size_t)tf->tf_a2);
+		if (retval < 0) err = 1;
+		else err=0;
 		
 	    break;
 		
 	    case SYS__exit:
 		sys__exit((int) tf->tf_a0);
 	    break;
-
-	    #endif	
-
+            #endif
+	    #if OPT_LAB5
+	    case SYS_open:
+	    	retval = sys_open((char*)tf->tf_a0,
+				   (int)tf->tf_a1,
+				   (mode_t)tf->tf_a2);
+		if(retval < 0) err = 1;
+		else err=0;
+	    break;
+	
+	    case SYS_close:
+	    retval = sys_close((int) tf->tf_a0);
+		if(retval < 0) err = 1;
+		else err=0;
+	    break;
+       	    #endif
 
 	    default:
 		kprintf("Unknown syscall %d\n", callno);

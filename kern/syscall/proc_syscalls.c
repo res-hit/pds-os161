@@ -39,7 +39,7 @@ sys__exit(int status)
   struct thread *t = curthread;
   #if OPT_LAB4
 	//!!!!!!!!!!!!!!!!!!!!!!////
- 	 struct proc* p = t->t_proc; //store struct process address since from curthread we won't be able to acces anymore!
+ 	 struct proc* p = t->t_proc; //store struct process address since from curthread we won't be able to acces anymore(thread and process decoupled!
   //t->t_retcode = status;
   t->t_proc->p_status = status;
   #endif	
