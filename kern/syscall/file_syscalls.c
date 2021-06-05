@@ -14,7 +14,7 @@
 struct vnode* filetable[OPEN_MAX];
 #endif
 
-//test with conman(requires read,write, exit)
+//test with testbin/conman(requires read,write, exit) for stdin
 ssize_t sys_read(int filehandle, char* buf, size_t size){
 	(void)filehandle;
 	//(void)buf;
@@ -26,7 +26,7 @@ ssize_t sys_read(int filehandle, char* buf, size_t size){
 	char kbuf[(int)size];
 	#endif
 
-int i;//uso improprio, sarebbe meglio un cast a int di size
+int i;
 	
 	//kgets(buf,size);
 	if ( filehandle == STDIN_FILENO){
@@ -95,15 +95,13 @@ ssize_t sys_write(int filehandle, char* buf, size_t size){
 	
 	//not sure but code must not reach this point, just to avoid compiler error
 	return -1;
-
-    //manca check sul fatto che file handle debba essere stdout
 }
 
 #if OPT_LAB5
 //1.note that in this implementation same files are opened in a system wide table in different entries
 //so processes reference global file descriptors (no isolation). Entries of the table can reference
 //same vnode, and each call to vfs_open and vfs_close increment the vn_refcounter of the vnode
-//2. are vfs_open and vfs_close atomical operations?
+//2. are vfs_open and vfs_close atomical operations? NO
 int sys_open(userptr_t filename, int flags, mode_t mode){
  int i;
  int fd;	
